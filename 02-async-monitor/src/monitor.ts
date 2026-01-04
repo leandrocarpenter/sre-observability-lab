@@ -1,32 +1,34 @@
 // src/monitor.ts
 import { checkServiceHealth } from "./utils/apiSimulator";
 
-// Função principal precisa ser ASYNC para usar AWAIT dentro
+/**
+ * Sequential health check implementation.
+ * Services checked one-by-one to establish baseline behavior before introducing parallelism.
+ * Fails immediately on first error (no partial success reporting).
+ */
 const runMonitor = async () => {
-    console.log("--- 📡 Iniciando Varredura de Serviços ---");
+    console.log("--- Initiating Service Scan ---");
     const startTime = Date.now();
 
     try {
-        console.log("1. Checando Database...");
-        // AWAIT: O código "para" aqui até o DB responder
+        console.log("1. Checking Database...");
         const dbResult = await checkServiceHealth("PostgreSQL-DB");
-        console.log(`✅ ${dbResult.service} está ${dbResult.status} (${dbResult.latency}ms)`);
+        console.log(`   ${dbResult.service}: ${dbResult.status} (${dbResult.latency}ms)`);
 
-        console.log("2. Checando Redis...");
+        console.log("2. Checking Redis...");
         const redisResult = await checkServiceHealth("Redis-Cache");
-        console.log(`✅ ${redisResult.service} está ${redisResult.status} (${redisResult.latency}ms)`);
+        console.log(`   ${redisResult.service}: ${redisResult.status} (${redisResult.latency}ms)`);
 
-        console.log("3. Checando API Gateway...");
+        console.log("3. Checking API Gateway...");
         const apiResult = await checkServiceHealth("API-Gateway");
-        console.log(`✅ ${apiResult.service} está ${apiResult.status} (${apiResult.latency}ms)`);
+        console.log(`   ${apiResult.service}: ${apiResult.status} (${apiResult.latency}ms)`);
 
     } catch (error: any) {
-        // Se QUALQUER um falhar (reject), cai aqui imediatamente
-        console.error(`🚨 ALERTA CRÍTICO: ${error.message}`);
+        console.error(`CRITICAL ALERT: ${error.message}`);
     }
 
     const totalTime = Date.now() - startTime;
-    console.log(`\n--- 🏁 Varredura finalizada em ${totalTime}ms ---`);
+    console.log(`\n--- Scan Complete: ${totalTime}ms ---`);
 };
 
 runMonitor();

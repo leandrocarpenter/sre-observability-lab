@@ -1,6 +1,7 @@
-// export: Torna essa interface visível para outros arquivos.
-// interface: Define a "forma" do objeto. Não gera código JS final, serve apenas para validação.
-
+/**
+ * Metric data contract for application monitoring.
+ * Enforces consistent metric structure across collection and formatting layers.
+ */
 export interface AppMetric {
     id: string;
     serviceName: string;

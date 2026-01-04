@@ -1,37 +1,34 @@
 import { checkServiceHealth } from "./utils/apiSimulator.js";
 
+/**
+ * Parallel health check using Promise.all.
+ * All checks execute concurrently, reducing total latency to the slowest check.
+ * Trade-off: Fails immediately on first rejection, discarding successful results.
+ * Use when all dependencies must be healthy for system operation.
+ */
 const runParallelMonitor = async () => {
-    console.log("--- 🚀 Iniciando Varredura PARALELA ---");
+    console.log("--- Initiating Parallel Scan ---");
     const startTime = Date.now();
 
     try {
-        // A Mágica Acontece Aqui:
-        // Passamos um ARRAY [] com todas as chamadas que queremos fazer.
-        // O await só destrava quando TODAS terminarem com sucesso.
         const results = await Promise.all([
             checkServiceHealth("PostgreSQL-DB"),
             checkServiceHealth("Redis-Cache"),
             checkServiceHealth("API-Gateway")
         ]);
 
-        // Se chegou aqui, TODOS deram certo.
-        // O 'results' é uma lista: [resultadoDB, resultadoRedis, resultadoAPI]
-        console.log("✅ Todos os serviços responderam!");
-        
-        // Vamos percorrer a lista de resultados para mostrar
+        console.log("All services healthy:");
         results.forEach((res) => {
-             console.log(`   -> ${res.service}: ${res.status} em ${res.latency}ms`);
+             console.log(`   ${res.service}: ${res.status} (${res.latency}ms)`);
         });
 
     } catch (error: any) {
-        // O PERIGO DO PROMISE.ALL:
-        // Se UM falhar, ele cai aqui imediatamente e descarta os outros sucessos.
-        console.error(`🚨 ALERTA: Um dos serviços falhou! A operação foi cancelada.`);
-        console.error(`Erro: ${error.message}`);
+        console.error(`ALERT: Service failure detected, operation aborted.`);
+        console.error(`Error: ${error.message}`);
     }
 
     const totalTime = Date.now() - startTime;
-    console.log(`\n--- 🏁 Tempo Total: ${totalTime}ms ---`);
+    console.log(`\n--- Total Time: ${totalTime}ms ---`);
 };
 
 runParallelMonitor();

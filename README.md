@@ -1,33 +1,59 @@
-# 🔭 SRE Observability Lab
+# SRE Observability Lab
 
-Este repositório documenta minha jornada de aprofundamento em **Node.js, TypeScript e Engenharia de Backend** com foco em **SRE e Observabilidade**.
+Technical training repository demonstrating backend engineering concepts using Node.js and TypeScript, with focus on Site Reliability Engineering practices and observability instrumentation.
 
-O objetivo final é construir uma aplicação instrumentada com **OpenTelemetry**, exportando métricas e traces para a stack do **Grafana (LGTM)** em um cluster Kubernetes.
+## Objective
 
-## 🛠️ Stack Tecnológica
+Build a production-ready application instrumented with OpenTelemetry, exporting telemetry data to the Grafana LGTM stack on a Kubernetes cluster.
 
-- **Runtime:** Node.js v22 (Current)
-- **Linguagem:** TypeScript (ESM Modules)
-- **Framework Web:** Fastify
-- **Infraestrutura:** Docker, Kubernetes (K3s)
-- **Observabilidade:** OpenTelemetry, Grafana, Prometheus
+## Technology Stack
 
-## 📚 Estrutura do Estudo
+| Category | Technology | Version |
+| :--- | :--- | :--- |
+| **Runtime** | Node.js | v22 (Current) |
+| **Language** | TypeScript | ESM Modules |
+| **Web Framework** | Fastify | Latest |
+| **Infrastructure** | Docker, Kubernetes (K3s) | - |
+| **Observability** | OpenTelemetry, Grafana, Prometheus | - |
 
-### [Módulo 01: Fundamentos & Tipagem](./01-cli-metrics)
-Foco em entender a base do TypeScript, interfaces, manipulação de arrays e diferenças entre `const`/`let` criando um simulador de coleta de métricas de CPU.
+## Project Structure
 
-### [Módulo 02: Assincronismo & Resiliência](./02-async-monitor)
-Implementação de simuladores de latência e Health Checks. Estudo profundo sobre o Event Loop, `async/await`, tratamento de erros e a diferença crítica entre `Promise.all` (fail-fast) e `Promise.allSettled` (resiliência).
+The repository is organized into progressive learning modules:
 
-### [Módulo 03: API & Arquitetura](./03-fastify-api)
-Criação de um servidor HTTP de alta performance com **Fastify**. Implementação do padrão *Clean Architecture* separando `App` (definição) de `Server` (execução) e análise de logs estruturados (JSON).
+### [Module 01: Fundamentals & Typing](./01-cli-metrics)
 
-## 🚀 Próximos Passos
-- [ ] Implementar regras de negócio e CRUD na API.
-- [ ] Instrumentação Manual com OpenTelemetry SDK.
-- [ ] Deploy no Cluster K3s local.
-- [ ] Integração com IA (Google Gemini) para análise de incidentes.
+Demonstrates TypeScript fundamentals through a CLI-based CPU metrics collector.
+
+**Key Concepts:**
+- Interface design and type safety
+- Memory management: `const` vs `let` usage patterns
+- Array manipulation and data transformation
+
+### [Module 02: Asynchrony & Resilience](./02-async-monitor)
+
+Implements asynchronous health monitoring with emphasis on error handling strategies for distributed systems.
+
+**Key Concepts:**
+- Event loop and `async/await` patterns
+- Promise concurrency: `Promise.all` (fail-fast) vs `Promise.allSettled` (resilient)
+- Latency simulation for testing failure scenarios
+
+### [Module 03: API & Architecture](./03-fastify-api)
+
+High-performance HTTP server demonstrating clean architecture principles using Fastify.
+
+**Key Concepts:**
+- Separation of concerns: application definition vs runtime execution
+- Structured logging for observability pipelines
+- Kubernetes-ready health endpoints (liveness probes)
+
+## Roadmap
+
+- [ ] Implement business logic and CRUD operations
+- [ ] Manual instrumentation using OpenTelemetry SDK
+- [ ] Deploy to local K3s cluster
+- [ ] Integrate AI-powered incident analysis (Google Gemini)
 
 ---
-*Desenvolvido por [Leandro Carpenter](https://github.com/leandrocarpenter)*
+
+**Author:** [Leandro Carpenter](https://github.com/leandrocarpenter)
