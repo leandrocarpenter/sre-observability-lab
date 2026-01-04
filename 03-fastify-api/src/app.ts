@@ -1,18 +1,23 @@
 import fastify from 'fastify';
 
-// Cria a instância do framework (logger: true ativa logs nativos)
+/**
+ * Application instance with structured logging enabled.
+ * Separating app definition from server execution enables independent testing
+ * and multiple server instances from the same configuration.
+ */
 export const app = fastify({
     logger: true 
 });
 
-// Definindo uma Rota (Endpoint)
-// GET /health -> Usado pelo K8s para saber se o pod está vivo (Liveness Probe)
+/**
+ * Health check endpoint for Kubernetes liveness probes.
+ * Returns process uptime to distinguish between fresh restarts and long-running instances.
+ * K8s uses this to determine if pod should be restarted.
+ */
 app.get('/health', async (request, reply) => {
-    
-    // O Fastify lida com async automaticamente
     return { 
         status: 'UP', 
         timestamp: new Date(),
-        uptime: process.uptime() // Tempo em segundos que o processo está rodando
+        uptime: process.uptime()
     };
 });

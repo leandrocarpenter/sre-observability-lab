@@ -1,27 +1,26 @@
 import { type AppMetric } from "./types/Metric";
 import { formatLog } from "./utils/formatter";
 
-// CONST: Use para OBJETOS e ARRAYS.
-// A "caixa" (serverMetrics) é imutável, mas o conteúdo pode mudar (push/pop).
+// In-memory storage chosen for simplicity. Production systems would use time-series databases.
 const serverMetrics: AppMetric[] = [];
 
-// Simulando dados chegando (Imagine que isso veio de um sensor)
+// Simulated sensor data representing real-time metrics collection from distributed services.
 const incomingData = [
     { id: "1", service: "payment-api", cpu: 45, mem: 512 },
     { id: "2", service: "auth-api", cpu: 12, mem: 128 },
-    { id: "3", service: "payment-api", cpu: 80, mem: 1024 }, // Pico de uso
+    { id: "3", service: "payment-api", cpu: 80, mem: 1024 },
 ];
 
-// LET: Use apenas quando a variável precisa ser REATRIBUÍDA.
-// Aqui 'totalCpu' vai mudar a cada iteração do loop, por isso usamos let.
+// Accumulator for aggregate metric calculation.
 let totalCpu = 0;
 
-console.log("--- Iniciando Coleta ---");
+console.log("--- Initiating Collection ---");
 
-// Iterando sobre os dados simulados
+// Transform raw sensor data into typed metrics with enriched metadata.
 incomingData.forEach((data) => {
+    // 70% CPU threshold aligns with typical alerting policies for containerized workloads.
     const currentStatus = data.cpu > 70 ? 'CRITICAL' : 'OK';
-    // Transformando o dado bruto no nosso Tipo (Interface)
+    
     const metric: AppMetric = {
         id: data.id,
         serviceName: data.service,
@@ -32,16 +31,11 @@ incomingData.forEach((data) => {
     };
 
     serverMetrics.push(metric);
-    
-    // Acumulando valor (variavel let sendo alterada)
     totalCpu += metric.cpuUsage;
-
-    // Usando a função importada
     console.log(formatLog(metric));
 });
 
 
-
-console.log("--- Resumo ---");
+console.log("--- Summary ---");
 console.log(`Total CPU Load: ${totalCpu}%`);
-console.log(`Métricas armazenadas: ${serverMetrics.length}`);
+console.log(`Metrics Stored: ${serverMetrics.length}`);

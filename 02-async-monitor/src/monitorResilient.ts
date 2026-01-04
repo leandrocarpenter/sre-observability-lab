@@ -1,37 +1,35 @@
 import { checkServiceHealth } from "./utils/apiSimulator";
 
+/**
+ * Resilient health check using Promise.allSettled.
+ * Waits for all checks to complete regardless of individual failures.
+ * Returns comprehensive status report including both successes and failures.
+ * Preferred for monitoring dashboards where partial visibility is valuable.
+ * No try-catch needed: allSettled never rejects.
+ */
 const runResilientMonitor = async () => {
-    console.log("--- 🛡️  Iniciando Varredura Resiliente (allSettled) ---");
+    console.log("--- Initiating Resilient Scan (allSettled) ---");
     const startTime = Date.now();
 
-    // NOTE que não precisamos de try/catch envolvendo o Promise.allSettled
-    // porque ele NUNCA rejeita (ele sempre devolve o relatório final).
     const results = await Promise.allSettled([
         checkServiceHealth("PostgreSQL-DB"),
         checkServiceHealth("Redis-Cache"),
         checkServiceHealth("API-Gateway")
     ]);
 
-    console.log("📋 Relatório de Status:");
+    console.log("Status Report:");
 
-    // Iteramos sobre o relatório
     results.forEach((result) => {
-        
-        // Verifica se deu sucesso (fulfilled)
         if (result.status === 'fulfilled') {
-            const data = result.value; // O TypeScript sabe que aqui tem 'value'
-            console.log(`   ✅ ${data.service}: UP (${data.latency}ms)`);
-        
+            const data = result.value;
+            console.log(`   [UP] ${data.service} (${data.latency}ms)`);
         } else {
-            // Se não, deu erro (rejected)
-            // Aqui não temos o 'data.service', pois a promessa falhou. 
-            // Temos apenas o motivo do erro (reason).
-            console.log(`   ❌ FALHA: ${result.reason.message}`);
+            console.log(`   [FAIL] ${result.reason.message}`);
         }
     });
 
     const totalTime = Date.now() - startTime;
-    console.log(`\n--- 🏁 Tempo Total: ${totalTime}ms (Latência do mais lento) ---`);
+    console.log(`\n--- Total Time: ${totalTime}ms (slowest check determines duration) ---`);
 };
 
 runResilientMonitor();
