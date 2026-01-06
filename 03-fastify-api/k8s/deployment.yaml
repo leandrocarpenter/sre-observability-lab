@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-api
+  namespace: sre-lab
+  labels:
+    app: inventory-api
+spec:
+  replicas: 2 # Vamos rodar 2 pods para testar balanceamento futuro
+  selector:
+    matchLabels:
+      app: inventory-api
+  template:
+    metadata:
+      labels:
+        app: inventory-api
+    spec:
+      containers:
+        - name: inventory-api
+          image: inventory-api:v1
+          imagePullPolicy: Never # OBRIGATÓRIO para imagens locais no K3s
+          ports:
+            - containerPort: 3333
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
