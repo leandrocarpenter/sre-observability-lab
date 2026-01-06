@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsx --import ./src/instrumentation.ts src/server.ts",
+    "start": "node --import ./dist/instrumentation.js dist/server.js",
+    "build": "tsc",
     "dev": "tsx watch --import ./src/instrumentation.ts src/server.ts"
   },
   "keywords": [],
