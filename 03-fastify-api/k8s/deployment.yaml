@@ -21,7 +21,7 @@ spec:
           imagePullPolicy: Never # OBRIGATÓRIO para imagens locais no K3s
           env:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://tempo.monitoring.svc.cluster.local:4317"
+              value: "http://otel-collector-opentelemetry-collector.monitoring.svc.cluster.local:4317"
           ports:
             - containerPort: 3333
           resources:

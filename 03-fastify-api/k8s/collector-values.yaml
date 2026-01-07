@@ -1,5 +1,6 @@
 mode: deployment
-
+image:
+  repository: "otel/opentelemetry-collector-contrib"
 config:
   receivers:
     otlp:
@@ -11,6 +12,20 @@ config:
 
   processors:
     batch:
+      timeout: 1s
+      send_batch_size: 1024
+
+    resource/enrichment:
+      attributes:
+        - key: deployment.environment
+          value: "sre-lab"
+          action: upsert
+        - key: k8s.cluster.name
+          value: "carpenter-k3s-local"
+          action: upsert
+        - key: data.origin
+          value: "otel-collector-gateway"
+          action: insert
 
   exporters:
     # Saída 1: Grafana Tempo (Backend Atual)
