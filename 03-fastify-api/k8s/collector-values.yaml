@@ -1,0 +1,33 @@
+mode: deployment
+
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+  processors:
+    batch:
+
+  exporters:
+    # Saída 1: Grafana Tempo (Backend Atual)
+    otlp:
+      endpoint: "tempo.monitoring.svc.cluster.local:4317"
+      tls:
+        insecure: true
+    
+    # Saída 2: Debug/Console (Simula um segundo Vendor/Splunk)
+    debug:
+      verbosity: detailed
+
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [batch]
+        exporters: [otlp, debug] # <--- A mágica do Multi-Vendor acontece aqui
+      metrics: null
+      logs: null
