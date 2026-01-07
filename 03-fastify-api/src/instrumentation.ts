@@ -1,22 +1,21 @@
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { ConsoleSpanExporter } from '@opentelemetry/sdk-trace-base';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
-/**
- * OpenTelemetry SDK initialization.
- * Auto-instrumentation detects Fastify, HTTP, and other supported libraries.
- * Console exporter used for development; replace with OTLP exporter for production.
- */
+const traceExporter = new OTLPTraceExporter({
+  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4317',
+});
+
 const sdk = new NodeSDK({
   resource: resourceFromAttributes({
     [ATTR_SERVICE_NAME]: 'inventory-api-v1',
   }),
-  traceExporter: new ConsoleSpanExporter(),
+  traceExporter,
   instrumentations: [getNodeAutoInstrumentations()],
 });
 
 sdk.start();
 
-console.log('OpenTelemetry initialized');
+console.log('🔭 OpenTelemetry initialized with OTLP Exporter');
