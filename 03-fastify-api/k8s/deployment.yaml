@@ -17,8 +17,11 @@ spec:
     spec:
       containers:
         - name: inventory-api
-          image: inventory-api:v1
+          image: inventory-api:v2
           imagePullPolicy: Never # OBRIGATÓRIO para imagens locais no K3s
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://tempo.monitoring.svc.cluster.local:4317"
           ports:
             - containerPort: 3333
           resources:
