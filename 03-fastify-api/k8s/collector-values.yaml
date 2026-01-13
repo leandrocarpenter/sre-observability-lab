@@ -1,6 +1,16 @@
 mode: deployment
+
 image:
   repository: "otel/opentelemetry-collector-contrib"
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "256Mi"
+    cpu: "200m"
+
 config:
   receivers:
     otlp:
@@ -15,7 +25,8 @@ config:
       timeout: 1s
       send_batch_size: 1024
 
-    resource/enrichment:
+    # --- CORREÇÃO: Simplificando o nome para 'resource' ---
+    resource:
       attributes:
         - key: deployment.environment
           value: "sre-lab"
@@ -25,16 +36,14 @@ config:
           action: upsert
         - key: data.origin
           value: "otel-collector-gateway"
-          action: insert
+          action: upsert
+    # ------------------------------------------------------
 
   exporters:
-    # Saída 1: Grafana Tempo (Backend Atual)
     otlp:
       endpoint: "tempo.monitoring.svc.cluster.local:4317"
       tls:
         insecure: true
-    
-    # Saída 2: Debug/Console (Simula um segundo Vendor/Splunk)
     debug:
       verbosity: detailed
 
@@ -42,7 +51,8 @@ config:
     pipelines:
       traces:
         receivers: [otlp]
-        processors: [batch]
-        exporters: [otlp, debug] # <--- A mágica do Multi-Vendor acontece aqui
+        # A ordem é vital: Enriqueça (resource) -> Depois processe em lote (batch)
+        processors: [resource, batch] 
+        exporters: [otlp, debug]
       metrics: null
       logs: null
