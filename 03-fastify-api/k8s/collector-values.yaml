@@ -3,6 +3,14 @@ mode: deployment
 image:
   repository: "otel/opentelemetry-collector-contrib"
 
+extraEnvs:
+  - name: CLUSTER_NAME
+    value: "carpenter-k3s-local"
+  - name: OTEL_VERSION
+    value: "0.119.0"
+  - name: IMAGE_VARIANT
+    value: "contrib-latest"
+
 resources:
   requests:
     memory: "128Mi"
@@ -10,6 +18,19 @@ resources:
   limits:
     memory: "256Mi"
     cpu: "200m"
+
+# Anotações para o Prometheus descobrir o Collector automaticamente
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8889"
+  prometheus.io/path: "/metrics"
+
+ports:
+  metrics:
+    enabled: true
+    containerPort: 8889
+    servicePort: 8889
+    protocol: TCP
 
 config:
   receivers:
@@ -24,35 +45,62 @@ config:
     batch:
       timeout: 1s
       send_batch_size: 1024
-
-    # --- CORREÇÃO: Simplificando o nome para 'resource' ---
     resource:
       attributes:
         - key: deployment.environment
           value: "sre-lab"
           action: upsert
         - key: k8s.cluster.name
-          value: "carpenter-k3s-local"
+          value: "${env:CLUSTER_NAME}"
+          action: upsert
+        - key: otel.collector.version
+          value: "${env:OTEL_VERSION}"
+          action: upsert
+        - key: image.version
+          value: "${env:IMAGE_VARIANT}"
           action: upsert
         - key: data.origin
           value: "otel-collector-gateway"
           action: upsert
-    # ------------------------------------------------------
+
+  # --- CORREÇÃO: Indentado com 2 espaços para pertencer ao 'config' ---
+  connectors:
+    spanmetrics:
+      histogram:
+        explicit:
+          buckets: [2ms, 10ms, 100ms, 1s, 10s]
+      dimensions:
+        - name: http.method
+        - name: http.status_code
+      dimensions_cache_size: 1000
+      metrics_flush_interval: 15s
+  # --------------------------------------------------------------------
 
   exporters:
     otlp:
       endpoint: "tempo.monitoring.svc.cluster.local:4317"
       tls:
         insecure: true
+    
+    prometheus:
+      endpoint: "0.0.0.0:8889"
+      send_timestamps: true
+      metric_expiration: 180m
+      
     debug:
-      verbosity: detailed
+      verbosity: normal
 
   service:
     pipelines:
       traces:
         receivers: [otlp]
-        # A ordem é vital: Enriqueça (resource) -> Depois processe em lote (batch)
-        processors: [resource, batch] 
-        exporters: [otlp, debug]
-      metrics: null
+        processors: [resource, batch]
+        exporters: [otlp, debug, spanmetrics] 
+      
+      metrics:
+        # Pipeline que recebe do conector e manda pro Prometheus
+        receivers: [otlp, spanmetrics] 
+        processors: [resource, batch]
+        exporters: [prometheus, debug]
+      
       logs: null
